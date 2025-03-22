@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: lms
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:h2:mem:lmsdb
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  webservices:
+    path: /ws
+  security:
+    user:
+      name: admin
+      password: pwd123
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  packages-to-scan: com.credable.lms.controller
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Custom application properties (these are valid custom properties for the application)
+lms:
+  cors:
+    allowed-origins: "*"
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
+    exposed-headers: Authorization
+  soap:
+    kyc:
+      url: ${LMS_SOAP_KYC_URL:https://kycapitest.credable.io/service/customerWsdl.wsdl}
+      username: ${LMS_SOAP_KYC_USERNAME:admin}
+      password: ${LMS_SOAP_KYC_PASSWORD:pwd123}
+    transaction:
+      url: ${LMS_SOAP_TRANSACTION_URL:https://trxapitest.credable.io/service/transactionWsdl.wsdl}
+      username: ${LMS_SOAP_TRANSACTION_USERNAME:admin}
+      password: ${LMS_SOAP_TRANSACTION_PASSWORD:pwd123}
+  scoring:
+    base-url: ${LMS_SCORING_BASE_URL:https://scoringtest.credable.io/api/v1}
+    retry:
+      max-attempts: 5
+      initial-delay: 5000 # 5 seconds
+      max-delay: 60000 # 1 minute
+      multiplier: 2.0
+  aws:
+    region: ${AWS_REGION:us-east-1}
+    access-key-id: ${AWS_ACCESS_KEY_ID:your-access-key}
+    secret-access-key: ${AWS_SECRET_ACCESS_KEY:your-secret-key}
+    sqs:
+      loan-request-queue: ${LMS_SQS_LOAN_REQUEST_QUEUE:lms-loan-request-queue}
+      scoring-request-queue: ${LMS_SQS_SCORING_REQUEST_QUEUE:lms-scoring-request-queue}
+      dlq: ${LMS_SQS_DLQ:lms-dead-letter-queue}
+    sns:
+      loan-status-topic: ${LMS_SNS_LOAN_STATUS_TOPIC:lms-loan-status-topic}
+    dynamodb:
+      endpoint: ${AWS_DYNAMODB_ENDPOINT:http://localhost:8000}
+      table-prefix: lms_
+  mqtt:
+    broker-url: ${LMS_MQTT_BROKER_URL:tcp://localhost:1883}
+    client-id: ${LMS_MQTT_CLIENT_ID:lms-server}
+    username: ${LMS_MQTT_USERNAME:lms}
+    password: ${LMS_MQTT_PASSWORD:lms-password}
+    topic-prefix: loans/
+
+logging:
+  level:
+    root: INFO
+    '[com.credable.lms]': DEBUG
+    '[org.springframework.web]': INFO
+    '[org.springframework.web.services.client.sent]': TRACE
+    '[org.springframework.web.services.client.received]': TRACE
